@@ -1,12 +1,7 @@
-//
-//  InjectMacro.swift
-//  SwinjectMacro
-//
-//  Created by NHN on 7/8/25.
-//
-
-import SwiftSyntaxMacros
+import SwiftCompilerPlugin
 import SwiftSyntax
+import SwiftSyntaxBuilder
+import SwiftSyntaxMacros
 
 public struct InjectMacro: AccessorMacro {
   public static func expansion(
@@ -29,4 +24,11 @@ public struct InjectMacro: AccessorMacro {
 
     return [AccessorDeclSyntax("\(raw: code)")]
   }
+}
+
+@main
+struct SwinjectMacroPlugin: CompilerPlugin {
+  let providingMacros: [Macro.Type] = [
+    InjectMacro.self,
+  ]
 }

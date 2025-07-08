@@ -31,14 +31,5 @@ let package = Package(
 
     // Library that exposes a macro as part of its API, which is used in client programs.
     .target(name: "SwinjectMacro", dependencies: ["SwinjectMacroMacros"]),
-
-    // A test target used to develop the macro implementation.
-    .testTarget(
-      name: "SwinjectMacroTests",
-      dependencies: [
-        "SwinjectMacroMacros",
-        .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
-      ]
-    ),
   ]
 )
