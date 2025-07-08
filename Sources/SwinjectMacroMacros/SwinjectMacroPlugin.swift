@@ -26,9 +26,24 @@ public struct InjectMacro: AccessorMacro {
   }
 }
 
+public struct InjectFunctionMacro: ExpressionMacro {
+  public static func expansion(
+    of node: some FreestandingMacroExpansionSyntax,
+    in context: some MacroExpansionContext
+  ) throws -> ExprSyntax {
+    guard let genericArgs = node.genericArgumentClause?.arguments,
+          let typeExpr = genericArgs.first?.argument else {
+      fatalError("Inject<T>() must have a generic argument")
+    }
+
+    return "Swinject.shared.container.resolve(\(typeExpr).self)!" // ExprSyntax
+  }
+}
+
 @main
 struct SwinjectMacroPlugin: CompilerPlugin {
   let providingMacros: [Macro.Type] = [
     InjectMacro.self,
+    InjectFunctionMacro.self,
   ]
 }

@@ -31,3 +31,8 @@ Swinject.shared.container.register(P.self) { _ in
 var a: P
 
 print("a : \(a)")
+
+
+var b = #Inject<P>()
+
+print("b : \(b)")
