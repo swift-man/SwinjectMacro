@@ -6,12 +6,28 @@
 //
 
 import SwinjectMacro
+import Swinject
 
-protocol A {
+public final class Swinject {
+  @MainActor public static let shared = Swinject()
+  public let container = Container()
+}
+
+protocol P {
 
 }
 
+class A: P {
+  init() {
+    print("A init")
+  }
+}
+
+Swinject.shared.container.register(P.self) { _ in
+  A()
+}
+
 @Inject
-var a: A
+var a: P
 
 print("a : \(a)")

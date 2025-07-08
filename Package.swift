@@ -13,9 +13,14 @@ let package = Package(
       name: "SwinjectMacro",
       targets: ["SwinjectMacro"]
     ),
+    .executable(
+        name: "SwinjectMacroClient",
+        targets: ["SwinjectMacroClient"]
+    ),
   ],
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "600.0.0-latest"),
+    .package(url: "https://github.com/Swinject/Swinject.git", from: "2.9.1"),
   ],
   targets: [
     // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -31,5 +36,12 @@ let package = Package(
 
     // Library that exposes a macro as part of its API, which is used in client programs.
     .target(name: "SwinjectMacro", dependencies: ["SwinjectMacroMacros"]),
+
+    // A client of the library, which is able to use the macro in its own code.
+    .executableTarget(name: "SwinjectMacroClient",
+                      dependencies: [
+      "SwinjectMacro",
+      "Swinject",
+    ]),
   ]
 )
