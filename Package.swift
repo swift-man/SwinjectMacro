@@ -11,7 +11,7 @@ let package = Package(
   ],
   dependencies: [
     // Xcode 15 → 509.x, Xcode 16.x → 600/601.x 자동 선택
-    .package(url: "https://github.com/swiftlang/swift-syntax.git", "509.0.0"..<"602.0.0"),
+    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "509.0.0"),
     .package(url: "https://github.com/Swinject/Swinject.git", from: "2.8.0"),
   ],
   targets: [
