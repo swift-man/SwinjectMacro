@@ -18,12 +18,12 @@ struct MacroExpansionErrorMessage: Error, CustomStringConvertible {
 public struct Inject: ExpressionMacro {
   public static func expansion(of node: some SwiftSyntax.FreestandingMacroExpansionSyntax,
                                in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> SwiftSyntax.ExprSyntax {
-    guard let first = node.argumentList.first?.expression else {
+    guard let first = node.arguments.first?.expression else {
       throw MacroExpansionErrorMessage("Usage: #Inject(Type.self)")
     }
 
     // name:, argument: 등 추가 인자를 문자열로 변환
-    let pass = node.argumentList.dropFirst().map { arg in
+    let pass = node.arguments.dropFirst().map { arg in
       if let label = arg.label?.text, !label.isEmpty {
         return "\(label): \(arg.expression)"
       }
