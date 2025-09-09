@@ -17,6 +17,6 @@ func example() {
   }
   
   let s: Service = #Inject(Service.self)
-  var maybe: Service? = #InjectOptional(Service.self)
+  let o: Service? = #InjectOptional(Service.self)
 }
 

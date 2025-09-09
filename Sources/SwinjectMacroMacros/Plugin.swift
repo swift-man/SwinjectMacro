@@ -5,10 +5,9 @@
 //  Created by NHN on 9/9/25.
 //
 
-//#if canImport(SwiftCompilerPlugin)
+#if canImport(SwiftCompilerPlugin)
 import SwiftCompilerPlugin
-import SwiftSyntax
-import SwiftSyntaxMacros
+import SwiftSyntaxMacros 
 
 @main
 struct SwinjectMacroPlugin: CompilerPlugin {
@@ -17,4 +16,4 @@ struct SwinjectMacroPlugin: CompilerPlugin {
     InjectOptional.self
   ]
 }
-//#endif
+#endif

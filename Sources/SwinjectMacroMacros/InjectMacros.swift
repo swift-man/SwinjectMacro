@@ -3,58 +3,38 @@ import SwiftSyntaxMacros
 import SwiftSyntaxBuilder
 import SwiftDiagnostics
 
-// throw 용 간단 Error
 struct MacroExpansionError: Error, CustomStringConvertible {
   let message: String
   init(_ message: String) { self.message = message }
   var description: String { message }
 }
 
-// 에디터에 다이애그 찍을 때
-struct SimpleMessage: DiagnosticMessage {
-  let message: String
-  var diagnosticID: MessageID { .init(domain: "SwinjectMacro", id: "error") }
-  var severity: DiagnosticSeverity { .error }
-}
-
-extension MacroExpansionContext {
-  func error(_ node: some SyntaxProtocol, _ message: String) {
-    self.diagnose(Diagnostic(node: Syntax(node), message: SimpleMessage(message: message)))
-  }
-}
-
-// 추가 인자 문자열 구성
-private func buildExtraArgs(from args: LabeledExprListSyntax?) -> String {
-  guard let args, args.count > 1 else { return "" }
-  let tail = args.dropFirst().map { arg in
-    if let label = arg.label?.text, !label.isEmpty {
-      return "\(label): \(arg.expression)"
-    } else {
-      return "\(arg.expression)"
-    }
-  }.joined(separator: ", ")
-  return tail.isEmpty ? "" : ", \(tail)"
-}
-
-// #Inject(Type.self[, ...]) -> resolve(...)!
 public struct Inject: ExpressionMacro {
   public static func expansion(
     of node: some FreestandingMacroExpansionSyntax,
     in context: some MacroExpansionContext
   ) throws -> ExprSyntax {
 
+    // Type.self 하나만 허용
     guard let first = node.arguments.first?.expression else {
-      context.error(node, "Usage: #Inject(Type.self[, ...])")
-      throw MacroExpansionError("Usage: #Inject(Type.self[, ...])")
+      // 위치 검사는 제거했으므로, 사용법만 안내
+      #if canImport(SwiftDiagnostics)
+      context.diagnose(
+        Diagnostic(
+          node: Syntax(node),
+          message: SimpleMessage(message: "Usage: #Inject(Type.self)")
+        )
+      )
+      #endif
+      throw MacroExpansionError("Usage: #Inject(Type.self)")
     }
 
-    let extra = buildExtraArgs(from: node.arguments)
-    let source = "Swinject.shared.container.resolve(\(first)\(extra))!"
+    // 파라미터 없이 강제 언래핑 버전
+    let source = "Swinject.shared.container.resolve(\(first))!"
     return ExprSyntax(stringLiteral: source)
   }
 }
 
-// #InjectOptional(Type.self[, ...]) -> resolve(...)?  (nil 허용)
 public struct InjectOptional: ExpressionMacro {
   public static func expansion(
     of node: some FreestandingMacroExpansionSyntax,
@@ -62,12 +42,26 @@ public struct InjectOptional: ExpressionMacro {
   ) throws -> ExprSyntax {
 
     guard let first = node.arguments.first?.expression else {
-      context.error(node, "Usage: #InjectOptional(Type.self[, ...])")
-      throw MacroExpansionError("Usage: #InjectOptional(Type.self[, ...])")
+      #if canImport(SwiftDiagnostics)
+      context.diagnose(
+        Diagnostic(
+          node: Syntax(node),
+          message: SimpleMessage(message: "Usage: #InjectOptional(Type.self)")
+        )
+      )
+      #endif
+      throw MacroExpansionError("Usage: #InjectOptional(Type.self)")
     }
 
-    let extra = buildExtraArgs(from: node.arguments)
-    let source = "Swinject.shared.container.resolve(\(first)\(extra))"
+    // 파라미터 없이 옵셔널 버전
+    let source = "Swinject.shared.container.resolve(\(first))"
     return ExprSyntax(stringLiteral: source)
   }
+}
+
+// 에디터 진단용(선택)
+struct SimpleMessage: DiagnosticMessage {
+  let message: String
+  var diagnosticID: MessageID { .init(domain: "SwinjectMacro", id: "error") }
+  var severity: DiagnosticSeverity { .error }
 }
