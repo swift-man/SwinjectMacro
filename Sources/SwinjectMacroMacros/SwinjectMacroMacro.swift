@@ -16,8 +16,10 @@ struct MacroExpansionErrorMessage: Error, CustomStringConvertible {
 }
 
 public struct Inject: ExpressionMacro {
-  public static func expansion(of node: some SwiftSyntax.FreestandingMacroExpansionSyntax,
-                               in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> SwiftSyntax.ExprSyntax {
+  public static func expansion(
+      of node: some FreestandingMacroExpansionSyntax,
+      in context: some MacroExpansionContext   // <- 제네릭 별칭(Context) 말고, 이렇게!
+    ) throws -> ExprSyntax {
     guard let first = node.arguments.first?.expression else {
       throw MacroExpansionErrorMessage("Usage: #Inject(Type.self)")
     }
@@ -38,13 +40,15 @@ public struct Inject: ExpressionMacro {
 }
 
 public struct InjectOptional: ExpressionMacro {
-  public static func expansion(of node: some SwiftSyntax.FreestandingMacroExpansionSyntax,
-                               in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> SwiftSyntax.ExprSyntax {
-    guard let first = node.argumentList.first?.expression else {
+  public static func expansion(
+      of node: some FreestandingMacroExpansionSyntax,
+      in context: some MacroExpansionContext   // <- 제네릭 별칭(Context) 말고, 이렇게!
+    ) throws -> ExprSyntax {
+    guard let first = node.arguments.first?.expression else {
       throw MacroExpansionErrorMessage("Usage: #InjectOptional(Type.self)")
     }
 
-    let pass = node.argumentList.dropFirst().map { arg in
+    let pass = node.arguments.dropFirst().map { arg in
       if let label = arg.label?.text, !label.isEmpty {
         return "\(label): \(arg.expression)"
       }
