@@ -10,7 +10,7 @@ let package = Package(
     .executable(name: "SwinjectMacroClient", targets: ["SwinjectMacroClient"]),
   ],
   dependencies: [
-    // Xcode 15 → 509.x, Xcode 16.x → 600/601.x 자동 선택
+    // 매크로 구현은 SwiftSyntax 509.x API를 사용합니다.
     .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "509.0.0"),
     .package(url: "https://github.com/Swinject/Swinject.git", from: "2.8.0"),
   ],
@@ -27,13 +27,26 @@ let package = Package(
     ),
     .target(
       name: "SwinjectMacro",
-      dependencies: ["SwinjectMacroMacros"]
+      dependencies: [
+        "SwinjectMacroMacros",
+        .product(name: "Swinject", package: "Swinject"),
+      ]
     ),
     .executableTarget(
       name: "SwinjectMacroClient",
       dependencies: [
         "SwinjectMacro",
         .product(name: "Swinject", package: "Swinject"),
+      ]
+    ),
+    .testTarget(
+      name: "SwinjectMacroTests",
+      dependencies: [
+        "SwinjectMacro",
+        "SwinjectMacroMacros",
+        .product(name: "Swinject", package: "Swinject"),
+        .product(name: "SwiftParser", package: "swift-syntax"),
+        .product(name: "SwiftSyntaxMacroExpansion", package: "swift-syntax"),
       ]
     )
   ]
