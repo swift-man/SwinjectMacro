@@ -6,6 +6,7 @@
 //  Copyright © 2026 swift-man. All rights reserved.
 //
 
+#if canImport(Testing)
 import Foundation
 import Swinject
 import SwinjectMacro
@@ -84,3 +85,4 @@ struct ResolverInjectionTests {
     #expect(first === second)
   }
 }
+#endif

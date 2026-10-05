@@ -6,6 +6,7 @@
 //  Copyright © 2026 swift-man. All rights reserved.
 //
 
+#if canImport(Testing)
 import Foundation
 import SwiftParser
 import SwiftSyntaxMacroExpansion
@@ -31,18 +32,19 @@ struct InjectionExpansionTests {
   }
 
   @Test(arguments: [
-    "#Inject()",
-    "#Inject(Service.self, container: resolver)",
-    "#InjectOptional(Service.self, resolver: resolver, extra: resolver)",
-    "#Inject(type: Service.self)"
+    ("#Inject()", "Usage: #Inject(Type.self) or #Inject(Type.self, resolver: resolver)"),
+    ("#Inject(Service.self, container: resolver)", "The second argument must use the 'resolver:' label."),
+    ("#InjectOptional(Service.self, resolver: resolver, extra: resolver)", "Usage: #InjectOptional(Type.self) or #InjectOptional(Type.self, resolver: resolver)"),
+    ("#Inject(type: Service.self)", "Usage: #Inject(Type.self) or #Inject(Type.self, resolver: resolver)")
   ])
-  func diagnosesUnsupportedArguments(source: String) {
+  func diagnosesUnsupportedArguments(source: String, expectedMessage: String) {
     let context = BasicMacroExpansionContext()
     _ = Parser.parse(source: source).expand(
       macros: ["Inject": Inject.self, "InjectOptional": InjectOptional.self],
       in: context
     )
 
-    #expect(!context.diagnostics.isEmpty)
+    #expect(context.diagnostics.map(\.message) == [expectedMessage])
   }
 }
+#endif

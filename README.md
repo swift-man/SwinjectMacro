@@ -53,4 +53,4 @@ func example() {
 
 ## Validation
 
-Run `swift test` with a Swift 6 or later toolchain for the Swift Testing suite. It checks independent containers, optional misses, Assembly factory resolution, single evaluation, object scope, legacy expansion compatibility, and invalid argument diagnostics. The package keeps its existing Swift tools 5.9 manifest and SwiftSyntax 509.x dependency; the test suite requires Swift Testing and is not an Xcode 15 test target.
+Run `swift test` with a Swift 6 or later toolchain for the Swift Testing suite. It checks independent containers, optional misses, Assembly factory resolution, single evaluation, object scope, legacy expansion compatibility, and invalid argument diagnostics. The package keeps its existing Swift tools 5.9 manifest and SwiftSyntax 509.x dependency. Test sources are guarded by `canImport(Testing)` so older toolchains can compile the test target without Swift Testing, but no assertions run there. An empty test target is not evidence of passing tests; verification requires Swift 6 or later.
