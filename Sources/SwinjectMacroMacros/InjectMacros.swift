@@ -23,21 +23,44 @@ extension MacroExpansionContext {
   }
 }
 
-// ---- #Inject(Type.self) → resolve(Type.self)! ----
+private func resolutionExpression(
+  of node: some FreestandingMacroExpansionSyntax,
+  in context: some MacroExpansionContext
+) throws -> ExprSyntax {
+  let arguments = Array(node.argumentList)
+  guard
+    arguments.count == 1 || arguments.count == 2,
+    let first = arguments.first,
+    first.label == nil
+  else {
+    let message = "Usage: #\(node.macro.text)(Type.self) or #\(node.macro.text)(Type.self, resolver: resolver)"
+    context.error(node, message)
+    throw MacroExpansionError(message)
+  }
+
+  let receiver: ExprSyntax
+  if arguments.count == 2 {
+    let resolver = arguments[1]
+    guard resolver.label?.text == "resolver" else {
+      let message = "The second argument must use the 'resolver:' label."
+      context.error(resolver, message)
+      throw MacroExpansionError(message)
+    }
+    receiver = "(\(resolver.expression))"
+  } else {
+    receiver = "Swinject.shared.container"
+  }
+  return "\(receiver).resolve(\(first.expression))"
+}
+
 public struct Inject: ExpressionMacro {
   public static func expansion(
     of node: some FreestandingMacroExpansionSyntax,
     in context: some MacroExpansionContext
   ) throws -> ExprSyntax {
 
-    // SwiftSyntax 5.9: node.argumentList (non-optional)
-    guard let first = node.argumentList.first?.expression else {
-      context.error(node, "Usage: #Inject(Type.self)")
-      throw MacroExpansionError("Usage: #Inject(Type.self)")
-    }
-
-    let source = "Swinject.shared.container.resolve(\(first))!"
-    return ExprSyntax(stringLiteral: source)
+    let resolution = try resolutionExpression(of: node, in: context)
+    return "\(resolution)!"
   }
 }
 
@@ -48,12 +71,6 @@ public struct InjectOptional: ExpressionMacro {
     in context: some MacroExpansionContext
   ) throws -> ExprSyntax {
 
-    guard let first = node.argumentList.first?.expression else {
-      context.error(node, "Usage: #InjectOptional(Type.self)")
-      throw MacroExpansionError("Usage: #InjectOptional(Type.self)")
-    }
-
-    let source = "Swinject.shared.container.resolve(\(first))"
-    return ExprSyntax(stringLiteral: source)
+    try resolutionExpression(of: node, in: context)
   }
 }
